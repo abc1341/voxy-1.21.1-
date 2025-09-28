@@ -31,7 +31,7 @@ public class BakedBlockEntityModel {
                 if (textureId == null) {
                     Logger.error("ERROR: Empty texture id for layer: " + layer);
                 } else {
-                    texId = ((net.minecraft.client.texture.GlTexture)MinecraftClient.getInstance().getTextureManager().getTexture(textureId).getGlTexture()).getGlId();
+                    texId = MinecraftClient.getInstance().getTextureManager().getTexture(textureId).getGlId();
                 }
             }
             if (texId == 0) continue;
@@ -69,7 +69,7 @@ public class BakedBlockEntityModel {
         entity.setWorld(MinecraftClient.getInstance().world);
         if (renderer != null) {
             try {
-                renderer.render(entity, 0.0f, new MatrixStack(), layer->map.computeIfAbsent(layer, rl -> new LayerConsumer(rl, new ReuseVertexConsumer().setDefaultMeta(getMetaFromLayer(rl)))).consumer, 0, 0, new Vec3d(0,0,0));
+                renderer.render(entity, 0.0f, new MatrixStack(), layer->map.computeIfAbsent(layer, rl -> new LayerConsumer(rl, new ReuseVertexConsumer().setDefaultMeta(getMetaFromLayer(rl)))).consumer, 0, 0);
             } catch (Exception e) {
                 Logger.error("Unable to bake block entity: " + entity, e);
             }

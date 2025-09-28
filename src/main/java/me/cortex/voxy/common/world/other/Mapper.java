@@ -7,12 +7,14 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.LeavesBlock;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Pair;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
 import org.lwjgl.system.MemoryUtil;
 
@@ -340,7 +342,7 @@ public class Mapper {
             if (state.getBlock() instanceof LeavesBlock) {
                 this.opacity = 15;
             } else {
-                this.opacity = state.getOpacity();
+                this.opacity = state.getOpacity(MinecraftClient.getInstance().world, new BlockPos(0,0,0));
             }
         }
 
@@ -360,10 +362,10 @@ public class Mapper {
         public static StateEntry deserialize(int id, byte[] data) {
             try {
                 var compound = NbtIo.readCompressed(new ByteArrayInputStream(data), NbtSizeTracker.ofUnlimitedBytes());
-                if (compound.getInt("id", -1) != id) {
+                if (compound.getInt("id") != id) {
                     throw new IllegalStateException("Encoded id != expected id");
                 }
-                var state = BlockState.CODEC.parse(NbtOps.INSTANCE, compound.getCompound("block_state").orElseThrow());
+                var state = BlockState.CODEC.parse(NbtOps.INSTANCE, compound.getCompound("block_state"));
                 if (state.isError()) {
                     Logger.error("Could not decode blockstate setting to air. id:" + id + " error: " + state.error().get().message());
                     return new StateEntry(id, Blocks.AIR.getDefaultState());
@@ -401,10 +403,10 @@ public class Mapper {
         public static BiomeEntry deserialize(int id, byte[] data) {
             try {
                 var compound = NbtIo.readCompressed(new ByteArrayInputStream(data), NbtSizeTracker.ofUnlimitedBytes());
-                if (compound.getInt("id", -1) != id) {
+                if (compound.getInt("id") != id) {
                     throw new IllegalStateException("Encoded id != expected id");
                 }
-                String biome = compound.getString("biome_id", null);
+                String biome = compound.getString("biome_id");
                 return new BiomeEntry(id, biome);
             } catch (IOException e) {
                 throw new RuntimeException(e);
